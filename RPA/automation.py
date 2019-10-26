@@ -56,16 +56,16 @@ def convert_polarity(polarity):
         return 'neutral'
     elif polarity >= 0.1:
         return 'positive'
-    else:
-        return 'neutral'
+    elif polarity <= 0.1:
+        return 'negative'
 
-feedback_test = ""
+feedback = ""
 for email in emails:
-    time.sleep(0.4)
+    time.sleep(0.45)
     email.click()
 
     find_element_presence(10, By.XPATH, '//h2[@class="hP"]')
-    feedback_test += 'Email: ' + driver.find_element_by_xpath('//h2[@class="hP"]').text + '\n'
+    feedback += 'Email: ' + driver.find_element_by_xpath('//h2[@class="hP"]').text + '\n'
 
     content = driver.find_element_by_xpath('//div[@class="ii gt"]').text
     blob = textblob.TextBlob(content)
@@ -75,14 +75,16 @@ for email in emails:
     for idx, sentence in enumerate(blob.sentences):
         avg_polarity += sentence.sentiment.polarity
         avg_subjectivity += sentence.sentiment.subjectivity
-        feedback_test += f'\tSentence {idx+1}: \n\tSentiment: {convert_polarity(sentence.sentiment.polarity)}\n\tSubjectivity: {sentence.sentiment.subjectivity}\n'
+        feedback += f'\tSentence {idx+1}: \n\t\tSentiment: {convert_polarity(sentence.sentiment.polarity)}\n\t\tSubjectivity: {sentence.sentiment.subjectivity}\n'
 
-        feedback_test += f'\tAverage polarity {avg_polarity/len(blob.sentences)}\n' 
-        feedback_test += f'\tAverage polarity {avg_subjectivity/len(blob.sentences)}\n' 
+    feedback += f'\n\tAverage polarity {avg_polarity/len(blob.sentences)} - {convert_polarity(avg_polarity/len(blob.sentences))}\n' 
+    feedback += f'\tAverage subjectivity {avg_subjectivity/len(blob.sentences)}\n' 
+
+    feedback += '-'*6 + '\n'
 
     driver.back()
 
-print(feedback_test)
+print(feedback)
 
 # Close the driver
 driver.close()

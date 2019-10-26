@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, shrink-to-fit=no"
+		/>
+
+		<link
+			rel="stylesheet"
+			href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+			integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+			crossorigin="anonymous"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css?family=Montserrat:200,400&display=swap"
+			rel="stylesheet"
+		/>
+
+		<title>Chatbots</title>
+
+		<script src="https://kit.fontawesome.com/bb1dbe06ef.js"></script>
+	</head>
+</html>
+<style>
+	.alert {
+		width: 30%;
+	}
+	.alert-dark {
+		float: right;
+	}
+</style>
+<body>
+	<div class="container">
+		<br>
+		<h1>Custom Feedback Chatbots</h1>
+		<hr />
+		<br />
+		<div class="messages">
+			<div id="demo">
+				<div class="alert alert-dark" role="alert">
+					Type anything below...
+				</div>
+				<br /><br />
+				<div class="alert alert-primary" role="alert">
+					And I will respond!
+				</div>
+				<hr><br>
+			</div>
+		</div>
+		<div class="input-group mb-3">
+			<input
+				type="text"
+				class="form-control"
+				placeholder="Type a message"
+				aria-label="Type a message"
+				aria-describedby="basic-addon2"
+				id="requestMessage"
+			/>
+			<div class="input-group-append">
+				<button class="btn btn-outline-primary" type="button" id="send">
+					Send
+				</button>
+			</div>
+		</div>
+	</div>
+	<script
+		src="https://code.jquery.com/jquery-3.3.1.min.js"
+		crossorigin="anonymous"
+	></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+		integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+		crossorigin="anonymous"
+	></script>
+	<script
+		src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+		crossorigin="anonymous"
+	></script>
+	<script>
+		var runs = 0;
+		$("#send").click(() => {
+			if(runs == 0) $('#demo').remove()
+			runs++;
+			var content = $("#requestMessage").val();
+			$(".messages").append(
+				$(`<div class='alert alert-dark' role='alert'>${content}</div>`)
+			);
+
+			var data = {
+				message: content
+			};
+			fetch("http://127.0.0.1:5000", {
+				method: "POST",
+				body: JSON.stringify(data)
+			})
+				.then(res => res.json())
+				.then(res => {
+					$(".messages").append(
+						$(
+							`<br><br><div class='alert alert-primary' role='alert'>${
+								res["response"]
+							}</div>`
+						)
+					);
+				});
+		});
+	</script>
+</body>
