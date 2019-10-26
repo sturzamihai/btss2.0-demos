@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, shrink-to-fit=no"
+		/>
+
+		<link
+			rel="stylesheet"
+			href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+			integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+			crossorigin="anonymous"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css?family=Montserrat:200,400&display=swap"
+			rel="stylesheet"
+		/>
+
+		<title>Brand Reputation</title>
+
+		<script src="https://kit.fontawesome.com/bb1dbe06ef.js"></script>
+	</head>
+</html>
+<style>
+	.alert {
+		width: 30%;
+	}
+	.alert-dark {
+		float: right;
+	}
+	#send {
+		margin-top: 5px;
+		width: 100%;
+	}
+</style>
+<body>
+	<div class="container">
+		<br />
+		<h1>Brand Reputation</h1>
+		<hr />
+		<div>
+			<p>
+				"Sentiment analysis (also known as opinion mining or emotion AI) refers
+				to the use of natural language processing, text analysis, computational
+				linguistics, and biometrics to systematically identify, extract,
+				quantify, and study affective states and subjective information." -
+				<a href="https://en.wikipedia.org/wiki/Sentiment_analysis">Wikipedia</a>
+			</p>
+		</div>
+		<div class="input-group">
+			<textarea
+				class="form-control"
+				aria-label="With textarea"
+				id="requestData"
+			></textarea>
+		</div>
+		<button class="btn btn-outline-primary" type="button" id="send">
+			Send
+		</button>
+	</div>
+	<script
+		src="https://code.jquery.com/jquery-3.3.1.min.js"
+		crossorigin="anonymous"
+	></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+		integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+		crossorigin="anonymous"
+	></script>
+	<script
+		src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+		crossorigin="anonymous"
+	></script>
+	<script>
+		function detect_polarity(polarity) {
+			if (polarity < 0.1 && polarity > -0.1) return "Neutral";
+			if (polarity >= 0.1) return "Positive";
+			if (polarity <= 0.1) return "Negative";
+		}
+
+		function create_table(data) {
+			data = data.slice(0, 15);
+			data.forEach(element => {
+				$("#tagsTable > tbody:last-child").append(
+					`
+		            <tr>
+		                <td>${element[0]}</td>
+		                <td>${element[1]}</td>
+		            </tr>`
+				);
+			});
+		}
+
+        function fill_summary(data) {
+			data = data.slice(0, 15);
+			data.forEach(element => {
+				$("#summaryTable > tbody:last-child").append(
+					`
+		            <tr>
+		                <td>${element}</td>
+		            </tr>`
+				);
+			});
+		}
+
+		var runs = 0;
+		$("#send").click(() => {
+			var content = $("#requestData").val();
+			var data = {
+				message: content
+			};
+			fetch("http://127.0.0.1:5000", {
+				method: "POST",
+				body: JSON.stringify(data)
+			})
+				.then(res => res.json())
+				.then(res => {
+					console.log(res);
+					if ($("#analytics")) $("#analytics").remove();
+					$(".container").append(
+						$(
+							`<div id="analytics">
+		                              <hr>
+		                              <div class="jumbotron">
+		                                  <h1 class="display-6">Analytics</h1>
+		                                  <hr class="my-4">
+		                                  <p class="lead">Sentiment</p>
+		                                  <progress max="2" style="width:100%" value="${res[
+																				"polarity"
+																			] +
+																				1}"></progress><p style="text-align: center">${detect_polarity(
+								res["polarity"]
+							)}</p>
+		                                  <p class="lead">Subjectivity</p>
+		                                  <progress max="2" style="width:100%" value="${res[
+																				"polarity"
+																			] + 1}"></progress>
+		                                  <p style="text-align: center">${res[
+																				"polarity"
+																			] + 1}</p>
+                                    <p class="lead">Sentence Parts</p>
+                                    <p>
+                                    NN: noun<br>
+                                    JJ: adjective<br>
+                                    IN: preposition<br>
+                                    VB_: verb (the _ gets replaced with various letters depending on the form of the verb)<br>
+                                    </p>
+		                              <table class="table" id="tagsTable">
+		                                  <thead>
+		                                      <tr>
+		                                      <th scope="col">Word</th>
+		                                      <th scope="col">Sentence Part</th>
+		                                      </tr>
+		                                  </thead>
+		                                  <tbody>
+		                                  </tbody>
+		                              </table>
+                                      <p class="lead">Summary</p>
+                                      <table class="table" id="summaryTable">
+		                                  <thead>
+		                                      <tr>
+		                                      <th scope="col">Word</th>
+		                                      </tr>
+		                                  </thead>
+		                                  <tbody>
+		                                  </tbody>
+		                              </table>
+                                    </div>
+		                          </div>`
+						)
+					);
+					create_table(res["tags"]);
+                    fill_summary(res['summary']);
+				});
+		});
+	</script>
+</body>
